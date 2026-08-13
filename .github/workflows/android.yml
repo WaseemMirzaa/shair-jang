@@ -6,6 +6,12 @@ on:
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Publish a GitHub Release with this tag (e.g. v1.0.0). Leave empty to just build."
+        required: false
+        default: ""
+
 
 jobs:
   build:
@@ -58,17 +64,19 @@ jobs:
 
       # Tagging v* publishes a release whose assets are directly downloadable .apk files.
       - name: Publish APKs to a GitHub Release
-        if: startsWith(github.ref, 'refs/tags/v')
+        if: startsWith(github.ref, 'refs/tags/v') || inputs.release_tag != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
         run: |
           set -e
-          v="${GITHUB_REF_NAME}"
+          v="${RELEASE_TAG:-$GITHUB_REF_NAME}"
           cp app/build/outputs/apk/debug/app-debug.apk \
              "smart-field-calculator-${v}-debug.apk"
           cp app/build/outputs/apk/release/app-release-unsigned.apk \
              "smart-field-calculator-${v}-release-unsigned.apk"
           gh release create "$v" \
+            --target "$GITHUB_SHA" \
             --title "Smart Field Calculator $v" \
             --notes "Offline educational trajectory simulator.
 
@@ -82,7 +90,7 @@ jobs:
   instrumented:
     name: UI tests on an emulator
     runs-on: ubuntu-latest
-    if: "!startsWith(github.ref, 'refs/tags/')"
+    if: "!startsWith(github.ref, 'refs/tags/') && inputs.release_tag == ''"
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
