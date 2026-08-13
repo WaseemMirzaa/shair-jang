@@ -3,6 +3,7 @@ name: Android CI
 on:
   push:
     branches: ["main", "master", "claude/**"]
+    tags: ["v*"]
   pull_request:
   workflow_dispatch:
 
@@ -10,6 +11,8 @@ jobs:
   build:
     name: Unit tests + APK
     runs-on: ubuntu-latest
+    permissions:
+      contents: write        # needed to publish the APKs as release assets
     steps:
       - uses: actions/checkout@v4
 
@@ -53,9 +56,33 @@ jobs:
           path: app/build/reports/tests/
           if-no-files-found: ignore
 
+      # Tagging v* publishes a release whose assets are directly downloadable .apk files.
+      - name: Publish APKs to a GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          v="${GITHUB_REF_NAME}"
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             "smart-field-calculator-${v}-debug.apk"
+          cp app/build/outputs/apk/release/app-release-unsigned.apk \
+             "smart-field-calculator-${v}-release-unsigned.apk"
+          gh release create "$v" \
+            --title "Smart Field Calculator $v" \
+            --notes "Offline educational trajectory simulator.
+
+          - \`smart-field-calculator-${v}-debug.apk\` — installs directly on any Android 8.0+ (API 26) device.
+          - \`smart-field-calculator-${v}-release-unsigned.apk\` — minified and resource-shrunk; sign it with your own keystore before distributing.
+
+          Built from \`${GITHUB_SHA}\`. Unit tests and Compose UI tests pass on this commit." \
+            "smart-field-calculator-${v}-debug.apk" \
+            "smart-field-calculator-${v}-release-unsigned.apk"
+
   instrumented:
     name: UI tests on an emulator
     runs-on: ubuntu-latest
+    if: "!startsWith(github.ref, 'refs/tags/')"
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
