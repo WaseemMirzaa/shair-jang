@@ -1,0 +1,175 @@
+<resources>
+    <!--
+      Every user-visible string lives here. Adding a language means dropping a translated copy of
+      this file into res/values-<code>/strings.xml (e.g. values-ur/ for Urdu) — no code changes.
+      Codes produced by the platform-independent domain layer (validation failures, engine status)
+      are mapped to these resources in ui/i18n/Messages.kt.
+    -->
+    <string name="app_name">Smart Field Calculator</string>
+
+    <!-- Main screen -->
+    <string name="title_main">SMART FIELD CALCULATOR</string>
+    <string name="subtitle_profile">PRE-LOADED PROFILE</string>
+    <string name="section_input_data">INPUT DATA</string>
+    <string name="badge_demo">DEMO</string>
+    <string name="label_profile">PROFILE:</string>
+    <string name="label_status">STATUS:</string>
+    <string name="cd_menu">Menu</string>
+
+    <!-- Operator inputs -->
+    <string name="label_range">RANGE</string>
+    <string name="label_wind_speed">WIND SPEED</string>
+    <string name="label_wind_direction">WIND DIRECTION</string>
+    <string name="label_temperature">TEMPERATURE</string>
+    <string name="label_altitude">ALTITUDE</string>
+    <string name="label_humidity">HUMIDITY</string>
+    <string name="label_inclination">INCLINATION</string>
+    <string name="unit_oclock">o\'clock</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_degree">°</string>
+
+    <!-- Keypad -->
+    <string name="key_clear">CLEAR</string>
+    <string name="key_enter">ENTER</string>
+    <string name="key_back">BACK</string>
+    <string name="key_menu">MENU</string>
+    <string name="key_solve">S O L V E</string>
+    <string name="key_up">UP</string>
+    <string name="key_down">DOWN</string>
+    <string name="key_left">LEFT</string>
+    <string name="key_right">RIGHT</string>
+    <string name="key_sign">+/-</string>
+    <string name="key_dot">.</string>
+
+    <!-- Menu -->
+    <string name="menu_select_profile">SELECT PROFILE</string>
+    <string name="menu_settings">SETTINGS</string>
+    <string name="menu_admin">ADMIN</string>
+    <string name="menu_reset">RESET INPUTS</string>
+
+    <!-- Status line -->
+    <string name="status_ready">READY</string>
+    <string name="status_calculating">CALCULATING…</string>
+    <string name="status_complete">CALCULATION COMPLETE</string>
+    <string name="status_locked">LOCKED</string>
+
+    <!-- Errors (operator-friendly; technical detail is logged, never shown) -->
+    <string name="error_invalid_range">INVALID RANGE</string>
+    <string name="error_invalid_wind">INVALID WIND SPEED</string>
+    <string name="error_invalid_direction">INVALID DIRECTION</string>
+    <string name="error_invalid_temperature">INVALID TEMPERATURE</string>
+    <string name="error_invalid_altitude">INVALID ALTITUDE</string>
+    <string name="error_invalid_humidity">INVALID HUMIDITY</string>
+    <string name="error_invalid_inclination">INVALID INCLINATION</string>
+    <string name="error_input_required">INPUT REQUIRED</string>
+    <string name="error_calculation">CALCULATION ERROR — TRY AGAIN</string>
+    <string name="error_profile_not_found">PROFILE NOT FOUND</string>
+
+    <!-- Results -->
+    <string name="results_title">SIMULATION RESULT</string>
+    <string name="results_none">NO RESULT. RUN A SOLVE.</string>
+    <string name="results_trajectory_data">TRAJECTORY DATA</string>
+    <string name="results_atmosphere">ATMOSPHERE</string>
+    <string name="results_height">HEIGHT</string>
+    <string name="results_drift">LATERAL DRIFT</string>
+    <string name="results_velocity">VELOCITY</string>
+    <string name="results_mach">MACH</string>
+    <string name="results_energy">ENERGY</string>
+    <string name="results_time">TIME</string>
+    <string name="results_apex">MAX HEIGHT</string>
+    <string name="results_density">DENSITY</string>
+    <string name="results_sound_speed">SOUND SPEED</string>
+    <string name="results_pressure">PRESSURE</string>
+    <string name="unit_density">kg/m³</string>
+    <string name="engine_not_loaded">ENGINE NOT LOADED</string>
+    <string name="engine_incomplete">GROUNDED BEFORE RANGE — SHOWING FLIGHT TO %1$s</string>
+
+    <!-- Buttons -->
+    <string name="btn_table">TABLE</string>
+    <string name="btn_graph">GRAPH</string>
+    <string name="btn_summary">SUMMARY</string>
+    <string name="btn_new_input">NEW INPUT</string>
+    <string name="btn_back">BACK</string>
+    <string name="btn_reset_view">RESET VIEW</string>
+
+    <!-- Trajectory table -->
+    <string name="table_title">TRAJECTORY TABLE</string>
+    <string name="table_empty">NO ROWS — NOTHING WAS SIMULATED</string>
+    <string name="table_col_range">RANGE</string>
+    <string name="table_col_height">HEIGHT</string>
+    <string name="table_col_drift">DRIFT</string>
+    <string name="table_col_velocity">VEL</string>
+    <string name="table_col_mach">MACH</string>
+    <string name="table_col_energy">ENERGY</string>
+    <string name="table_col_time">TIME</string>
+
+    <!-- Graph -->
+    <string name="graph_title">TRAJECTORY GRAPH</string>
+    <string name="graph_hint">PINCH TO ZOOM · DRAG TO PAN</string>
+    <string name="graph_empty">NO TRAJECTORY DATA</string>
+    <string name="graph_axes">X: DISTANCE · Y: HEIGHT</string>
+
+    <!-- Profiles -->
+    <string name="profiles_title">SELECT PROFILE</string>
+    <string name="profiles_subtitle">OPERATORS MAY SELECT ONLY</string>
+    <string name="profile_locked">LOCKED</string>
+    <string name="profile_unlocked">UNLOCKED</string>
+    <string name="profile_active">ACTIVE</string>
+    <string name="profile_none">NO PROFILE</string>
+
+    <!-- Admin -->
+    <string name="admin_title">ADMIN ACCESS</string>
+    <string name="admin_pin_hint">ENTER PIN (DEFAULT 0000)</string>
+    <string name="admin_pin_label">PIN</string>
+    <string name="admin_unlock">UNLOCK</string>
+    <string name="admin_incorrect">INCORRECT PIN</string>
+    <string name="admin_profiles_title">ADMIN — PROFILES</string>
+    <string name="admin_profiles_subtitle">CREATE / EDIT / DELETE PROTECTED DATA</string>
+    <string name="admin_new_profile">NEW PROFILE</string>
+    <string name="admin_lock">LOCK</string>
+    <string name="admin_edit">EDIT</string>
+
+    <!-- Profile editor -->
+    <string name="editor_new">NEW PROFILE</string>
+    <string name="editor_edit">EDIT PROFILE</string>
+    <string name="editor_name">NAME</string>
+    <string name="editor_section_projectile">PROJECTILE</string>
+    <string name="editor_calibre">CALIBRE (mm)</string>
+    <string name="editor_mass">MASS (kg)</string>
+    <string name="editor_length">LENGTH (m)</string>
+    <string name="editor_velocity">NOMINAL LAUNCH VELOCITY (m/s)</string>
+    <string name="editor_drag_model">DRAG MODEL</string>
+    <string name="editor_section_geometry">REFERENCE GEOMETRY</string>
+    <string name="editor_ref_height">REFERENCE HEIGHT (m)</string>
+    <string name="editor_ref_distance">REFERENCE DISTANCE (m)</string>
+    <string name="editor_section_env">ENVIRONMENT DEFAULTS</string>
+    <string name="editor_temp">TEMPERATURE (°C)</string>
+    <string name="editor_humidity">HUMIDITY (%)</string>
+    <string name="editor_altitude">ALTITUDE (m)</string>
+    <string name="editor_locked">LOCKED (operators cannot edit)</string>
+    <string name="editor_demo">DEMO PROFILE (shows the DEMO badge)</string>
+    <string name="editor_save">SAVE</string>
+    <string name="editor_cancel">CANCEL</string>
+    <string name="editor_delete">DELETE PROFILE</string>
+
+    <!-- Settings -->
+    <string name="settings_title">SETTINGS</string>
+    <string name="settings_unit_system">UNIT SYSTEM</string>
+    <string name="settings_metric">METRIC</string>
+    <string name="settings_imperial">IMPERIAL</string>
+    <string name="settings_theme">THEME</string>
+    <string name="theme_olive">OLIVE</string>
+    <string name="theme_amber">AMBER</string>
+    <string name="theme_hicon">HI-CON</string>
+    <string name="settings_brightness">SCREEN BRIGHTNESS: %1$d%%</string>
+    <string name="settings_timeout">SCREEN TIMEOUT: %1$ds</string>
+    <string name="settings_sound">KEY SOUND</string>
+    <string name="settings_vibration">VIBRATION</string>
+    <string name="settings_language">LANGUAGE</string>
+    <string name="settings_admin_pin">CHANGE ADMIN PIN</string>
+    <string name="settings_new_pin">NEW PIN (4-8 DIGITS)</string>
+    <string name="settings_update_pin">UPDATE PIN</string>
+    <string name="settings_offline">OFFLINE • NO NETWORK ACCESS</string>
+    <string name="settings_about">ABOUT</string>
+    <string name="about_body">Smart Field Calculator %1$s — an offline educational trajectory simulator. Outputs are physics quantities only.</string>
+</resources>

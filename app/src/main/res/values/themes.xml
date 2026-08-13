@@ -1,0 +1,8 @@
+<resources>
+    <!-- Base theme; the live UI theming is driven by Compose (ui/theme). -->
+    <style name="Theme.SmartFieldCalculator" parent="android:Theme.Material.NoActionBar">
+        <item name="android:statusBarColor">@color/rugged_black</item>
+        <item name="android:navigationBarColor">@color/rugged_black</item>
+        <item name="android:windowBackground">@color/rugged_black</item>
+    </style>
+</resources>
