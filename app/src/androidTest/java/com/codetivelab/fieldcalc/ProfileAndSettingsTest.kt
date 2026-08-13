@@ -33,7 +33,7 @@ class ProfileAndSettingsTest {
     }
 
     private fun openMenuItem(label: String) {
-        rule.onNodeWithTag(KeypadTags.MENU).performClick()
+        rule.tap(KeypadTags.MENU)
         rule.onNodeWithText(label).performClick()
         rule.waitForIdle()
     }
@@ -60,19 +60,19 @@ class ProfileAndSettingsTest {
     @Test fun switchingUnits_convertsTheDisplayedValues() {
         // Start from metric and put a known 600 m into RANGE.
         openMenuItem("SETTINGS")
-        rule.onNodeWithTag(TAG_SETTINGS_METRIC).performClick()
-        rule.onNodeWithTag(TAG_SETTINGS_BACK).performClick()
+        rule.tap(TAG_SETTINGS_METRIC)
+        rule.tap(TAG_SETTINGS_BACK)
         backToCalculator()
 
-        rule.onNodeWithTag(CalculatorTags.field(Field.RANGE)).performClick()
-        rule.onNodeWithTag(KeypadTags.CLEAR).performClick()
-        listOf(6, 0, 0).forEach { rule.onNodeWithTag(KeypadTags.digit(it)).performClick() }
-        rule.onNodeWithTag(KeypadTags.ENTER).performClick()
+        rule.tap(CalculatorTags.field(Field.RANGE))
+        rule.tap(KeypadTags.CLEAR)
+        listOf(6, 0, 0).forEach { rule.tap(KeypadTags.digit(it)) }
+        rule.tap(KeypadTags.ENTER)
 
         // Switch to imperial: 600 m ≈ 656 yd.
         openMenuItem("SETTINGS")
-        rule.onNodeWithTag(TAG_SETTINGS_IMPERIAL).performClick()
-        rule.onNodeWithTag(TAG_SETTINGS_BACK).performClick()
+        rule.tap(TAG_SETTINGS_IMPERIAL)
+        rule.tap(TAG_SETTINGS_BACK)
         backToCalculator()
 
         rule.waitUntil(timeoutMillis = 10_000) {
@@ -81,8 +81,8 @@ class ProfileAndSettingsTest {
 
         // Leave the app in metric for whatever runs next.
         openMenuItem("SETTINGS")
-        rule.onNodeWithTag(TAG_SETTINGS_METRIC).performClick()
-        rule.onNodeWithTag(TAG_SETTINGS_BACK).performClick()
+        rule.tap(TAG_SETTINGS_METRIC)
+        rule.tap(TAG_SETTINGS_BACK)
         backToCalculator()
     }
 
@@ -93,7 +93,7 @@ class ProfileAndSettingsTest {
         assertTrue(rule.hasTag(TAG_ADMIN_BACK))
         rule.onNodeWithText("CREATE / EDIT / DELETE PROTECTED DATA").assertDoesNotExist()
 
-        rule.onNodeWithTag(TAG_ADMIN_BACK).performClick()
+        rule.tap(TAG_ADMIN_BACK)
         backToCalculator()
     }
 }

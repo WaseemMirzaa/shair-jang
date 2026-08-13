@@ -44,15 +44,15 @@ class CalculatorFlowTest {
 
     /** Operator inputs persist across launches, so each test resets them first. */
     private fun resetInputs() {
-        rule.onNodeWithTag(KeypadTags.MENU).performClick()
+        rule.tap(KeypadTags.MENU)
         rule.onNodeWithText("RESET INPUTS").performClick()
         rule.waitForIdle()
     }
 
     private fun enter(field: Field, vararg digits: Int) {
-        rule.onNodeWithTag(CalculatorTags.field(field)).performClick()
-        rule.onNodeWithTag(KeypadTags.CLEAR).performClick()
-        digits.forEach { rule.onNodeWithTag(KeypadTags.digit(it)).performClick() }
+        rule.tap(CalculatorTags.field(field))
+        rule.tap(KeypadTags.CLEAR)
+        digits.forEach { rule.tap(KeypadTags.digit(it)) }
     }
 
     private fun valueOf(field: Field) =
@@ -65,10 +65,10 @@ class CalculatorFlowTest {
     }
 
     @Test fun clearKey_emptiesTheEditBuffer() {
-        rule.onNodeWithTag(CalculatorTags.field(Field.WIND)).performClick()
-        rule.onNodeWithTag(KeypadTags.digit(9)).performClick()
-        rule.onNodeWithTag(KeypadTags.digit(9)).performClick()
-        rule.onNodeWithTag(KeypadTags.CLEAR).performClick()
+        rule.tap(CalculatorTags.field(Field.WIND))
+        rule.tap(KeypadTags.digit(9))
+        rule.tap(KeypadTags.digit(9))
+        rule.tap(KeypadTags.CLEAR)
 
         // With an empty buffer the field falls back to its committed value, not "99".
         val shown = rule.textOf(CalculatorTags.value(Field.WIND))
@@ -77,13 +77,13 @@ class CalculatorFlowTest {
 
     @Test fun backKey_deletesTheLastDigit() {
         enter(Field.RANGE, 1, 2, 3)
-        rule.onNodeWithTag(KeypadTags.BACK).performClick()
+        rule.tap(KeypadTags.BACK)
         valueOf(Field.RANGE).assertTextEquals("12_")
     }
 
     @Test fun enterKey_commitsAndAdvancesToTheNextField() {
         enter(Field.RANGE, 6, 0, 0)
-        rule.onNodeWithTag(KeypadTags.ENTER).performClick()
+        rule.tap(KeypadTags.ENTER)
 
         // RANGE keeps the committed value (caret gone) and WIND now carries it.
         valueOf(Field.RANGE).assertTextEquals("600")
@@ -92,37 +92,37 @@ class CalculatorFlowTest {
     }
 
     @Test fun downAndUpKeys_walkTheFieldList() {
-        rule.onNodeWithTag(CalculatorTags.field(Field.RANGE)).performClick()
-        rule.onNodeWithTag(KeypadTags.DOWN).performClick()
+        rule.tap(CalculatorTags.field(Field.RANGE))
+        rule.tap(KeypadTags.DOWN)
         assertTrue(rule.textOf(CalculatorTags.value(Field.WIND)).endsWith("_"))
 
-        rule.onNodeWithTag(KeypadTags.UP).performClick()
+        rule.tap(KeypadTags.UP)
         assertTrue(rule.textOf(CalculatorTags.value(Field.RANGE)).endsWith("_"))
     }
 
     @Test fun solve_showsTheResultThenTableThenGraphThenReturns() {
         enter(Field.RANGE, 6, 5, 0)
 
-        rule.onNodeWithTag(KeypadTags.SOLVE).performClick()
+        rule.tap(KeypadTags.SOLVE)
         rule.waitUntil(timeoutMillis = 20_000) { rule.hasTag(ResultsTags.TITLE) }
         rule.onNodeWithTag(ResultsTags.SUMMARY).assertIsDisplayed()
 
-        rule.onNodeWithTag(ResultsTags.BTN_TABLE).performClick()
+        rule.tap(ResultsTags.BTN_TABLE)
         rule.onNodeWithTag(ResultsTags.TABLE).assertIsDisplayed()
 
-        rule.onNodeWithTag(ResultsTags.BTN_GRAPH).performClick()
+        rule.tap(ResultsTags.BTN_GRAPH)
         rule.onNodeWithTag(TAG_TRAJECTORY_GRAPH).assertIsDisplayed()
 
-        rule.onNodeWithTag(ResultsTags.BTN_BACK).performClick()
+        rule.tap(ResultsTags.BTN_BACK)
         rule.waitUntil(timeoutMillis = 10_000) { rule.hasTag(CalculatorTags.STATUS) }
     }
 
     @Test fun back_fromResults_staysOnTheCalculator() {
         enter(Field.RANGE, 5, 0, 0)
-        rule.onNodeWithTag(KeypadTags.SOLVE).performClick()
+        rule.tap(KeypadTags.SOLVE)
         rule.waitUntil(timeoutMillis = 20_000) { rule.hasTag(ResultsTags.TITLE) }
 
-        rule.onNodeWithTag(ResultsTags.BTN_BACK).performClick()
+        rule.tap(ResultsTags.BTN_BACK)
         rule.waitUntil(timeoutMillis = 10_000) { rule.hasTag(CalculatorTags.STATUS) }
         rule.waitForIdle()
         // A stale result must not bounce the operator forward again.
@@ -132,7 +132,7 @@ class CalculatorFlowTest {
     @Test fun invalidInput_showsAnOperatorMessageAndDoesNotNavigate() {
         enter(Field.RANGE, 5, 0, 0)             // a valid range, so humidity is what fails
         enter(Field.HUMIDITY, 9, 9, 9)          // 999 % is out of range
-        rule.onNodeWithTag(KeypadTags.SOLVE).performClick()
+        rule.tap(KeypadTags.SOLVE)
 
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.textOf(CalculatorTags.STATUS) == "INVALID HUMIDITY"
@@ -142,7 +142,7 @@ class CalculatorFlowTest {
 
     @Test fun missingRange_isReportedAsInputRequired() {
         // RESET leaves the range at zero, so SOLVE must refuse it.
-        rule.onNodeWithTag(KeypadTags.SOLVE).performClick()
+        rule.tap(KeypadTags.SOLVE)
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.textOf(CalculatorTags.STATUS) == "INPUT REQUIRED"
         }
