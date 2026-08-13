@@ -103,6 +103,7 @@ app/src/main/java/com/codetivelab/fieldcalc/
 │   ├── models/                 Units, OperatorInput, Profile, Trajectory, AtmosphereState
 │   ├── units/                  UnitConverter — SI ⇄ metric/imperial at the display edge
 │   ├── validation/             InputValidator — returns codes, not sentences
+│   ├── input/                  InputEditor — keypad entry rules (buffer, navigation, commit)
 │   ├── atmosphere/             AtmosphereModel — ISA pressure, moist-air density, speed of sound
 │   └── engine/                 SimulationEngine, TrajectorySimulationEngine, Integrator,
 │                               DragModel, Vec3
@@ -235,13 +236,15 @@ profile, and the last operator inputs (stored in SI so they survive a unit-syste
 ## Testing
 
 ```bash
-./gradlew test                   # 75 JVM unit tests
+./gradlew test                   # 102 JVM unit tests
 ./gradlew connectedAndroidTest   # instrumented Compose UI tests
 ```
 
 Unit tests (`app/src/test/`) cover the unit converter (round trips, every quantity, formatting),
 input validation, the atmosphere model, the drag models, the integrators, the trajectory model
-(interpolation, table sampling) and the engine itself — including a check that the RK4 solution of a
+(interpolation, table sampling), the keypad entry rules (`InputEditor`: digit/dot/sign/backspace
+behaviour, field navigation, commit-with-unit-conversion, display formatting), the Room type
+converters, and the engine itself — including a check that the RK4 solution of a
 drag-free launch matches the closed-form parabola to under a millimetre, that total energy is
 conserved in vacuum, that RK4 beats Euler at the same step, and that wind, altitude and inclination
 push the results in the physically correct direction. `ProfileRepositoryTest` exercises seeding,
@@ -251,9 +254,10 @@ UI tests (`app/src/androidTest/`) drive the real app: keypad digit entry, CLEAR,
 advance, arrow keys, SOLVE → results → table → graph → back, invalid-input messaging, profile
 selection and metric/imperial switching.
 
-Because the `domain` package is Android-free, it can also be compiled and tested with a plain Kotlin
-compiler and JUnit — no SDK, no emulator. That is exactly how the physics was verified for this
-commit.
+Because the `domain` package is Android-free, it can be compiled and run with a plain Kotlin
+compiler and JUnit — no SDK, no emulator. The keypad rules live in `domain/input/InputEditor.kt`
+rather than in the ViewModel for exactly this reason: what the operator types is behaviour worth
+testing on every host, not just on Android.
 
 ---
 

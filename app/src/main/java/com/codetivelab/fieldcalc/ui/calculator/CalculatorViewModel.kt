@@ -7,10 +7,11 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.codetivelab.fieldcalc.R
 import com.codetivelab.fieldcalc.ServiceLocator
+import com.codetivelab.fieldcalc.domain.input.InputEditor
+import com.codetivelab.fieldcalc.domain.input.InputField
 import com.codetivelab.fieldcalc.domain.models.ClockDirection
 import com.codetivelab.fieldcalc.domain.models.OperatorInput
 import com.codetivelab.fieldcalc.domain.models.Profile
-import com.codetivelab.fieldcalc.domain.models.Quantity
 import com.codetivelab.fieldcalc.domain.models.SolveResult
 import com.codetivelab.fieldcalc.domain.models.UnitSystem
 import com.codetivelab.fieldcalc.domain.units.UnitConverter
@@ -29,7 +30,11 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-enum class Field { RANGE, WIND, DIRECTION, TEMPERATURE, ALTITUDE, HUMIDITY, INCLINATION }
+/**
+ * The operator fields, defined in the portable domain layer so the entry rules can be unit-tested
+ * off-device. Aliased here because the screens and UI tests address them as `Field`.
+ */
+typealias Field = InputField
 
 data class CalcUiState(
     val profile: Profile? = null,
@@ -111,65 +116,31 @@ class CalculatorViewModel(app: Application) : AndroidViewModel(app) {
         )
     }
 
-    // ---- Field <-> Quantity mapping ----
-
-    private fun quantityOf(f: Field): Quantity? = when (f) {
-        Field.RANGE -> Quantity.DISTANCE
-        Field.WIND -> Quantity.VELOCITY
-        Field.TEMPERATURE -> Quantity.TEMPERATURE
-        Field.ALTITUDE -> Quantity.ALTITUDE
-        Field.HUMIDITY, Field.INCLINATION, Field.DIRECTION -> null // unitless / special
-    }
+    // ---- Field <-> display mapping (rules live in InputEditor) ----
 
     /** Current value of a field in the active display unit; the live edit buffer wins if present. */
     fun displayValue(f: Field): String {
         val st = _state.value
         if (f == st.selected && st.buffer.isNotEmpty()) return st.buffer
-        return rawDisplay(f)
+        return InputEditor.display(f, st.si, st.unit)
     }
 
-    private fun rawDisplay(f: Field): String {
-        val st = _state.value
-        return when (f) {
-            Field.DIRECTION -> st.si.windDirection.hour.toString()
-            Field.HUMIDITY -> UnitConverter.format(st.si.humidityPct, 0)
-            Field.INCLINATION -> {
-                val v = st.si.inclinationDeg
-                (if (v > 0) "+" else "") + UnitConverter.format(v, 0)
-            }
-            else -> {
-                val si = when (f) {
-                    Field.RANGE -> st.si.rangeM
-                    Field.WIND -> st.si.windSpeedMs
-                    Field.TEMPERATURE -> st.si.temperatureC
-                    Field.ALTITUDE -> st.si.altitudeM
-                    else -> 0.0
-                }
-                val q = quantityOf(f)!!
-                val decimals = if (f == Field.WIND) 1 else 0
-                UnitConverter.format(UnitConverter.toDisplay(si, q, st.unit), decimals)
-            }
-        }
-    }
-
-    /** Unit suffix shown next to a field; DIRECTION/HUMIDITY/INCLINATION are handled by the screen. */
-    fun unitQuantity(f: Field): Quantity? = quantityOf(f)
-
-    fun unitLabel(f: Field): String? = quantityOf(f)?.let { UnitConverter.label(it, _state.value.unit) }
+    /** Unit suffix shown next to a field; DIRECTION/HUMIDITY/INCLINATION are labelled by the screen. */
+    fun unitLabel(f: Field): String? =
+        InputEditor.quantityOf(f)?.let { UnitConverter.label(it, _state.value.unit) }
 
     // ---- Keypad handling ----
 
     fun onKey(key: Key) {
         val st = _state.value
         when (key) {
-            is Key.Digit -> setBuffer(appendDigit(currentBuffer(), key.value.toString()))
-            Key.Dot -> if (!currentBuffer().contains(".") && st.selected != Field.DIRECTION)
-                setBuffer(currentBuffer().ifEmpty { "0" } + ".")
-            Key.Sign -> setBuffer(toggleSign(currentBuffer()))
-            Key.Back, Key.Left -> setBuffer(currentBuffer().dropLast(1))
+            is Key.Digit -> setBuffer(InputEditor.appendDigit(st.buffer, key.value))
+            Key.Dot -> setBuffer(InputEditor.appendDecimalPoint(st.buffer, st.selected))
+            Key.Sign -> setBuffer(InputEditor.toggleSign(st.buffer))
+            Key.Back, Key.Left -> setBuffer(InputEditor.backspace(st.buffer))
             Key.Clear -> setBuffer("")
-            Key.Up -> select(prevField(st.selected))
-            Key.Down, Key.Enter, Key.Right -> select(nextField(st.selected))
+            Key.Up -> select(InputEditor.previous(st.selected))
+            Key.Down, Key.Enter, Key.Right -> select(InputEditor.next(st.selected))
             Key.Solve -> solve()
             Key.Menu -> Unit // handled by the screen (opens the menu)
         }
@@ -180,48 +151,19 @@ class CalculatorViewModel(app: Application) : AndroidViewModel(app) {
         _state.value = _state.value.copy(selected = field, error = null, buffer = "")
     }
 
-    private fun currentBuffer(): String = _state.value.buffer
     private fun setBuffer(v: String) { _state.value = _state.value.copy(buffer = v, error = null) }
-
-    private fun appendDigit(buffer: String, digit: String): String {
-        val next = (if (buffer == "0") "" else buffer) + digit
-        return next.take(8)
-    }
-
-    private fun toggleSign(buffer: String): String =
-        if (buffer.startsWith("-")) buffer.drop(1) else "-$buffer"
 
     /** Parse the edit buffer for the selected field and fold it back into the SI state. */
     private fun commit() {
         val st = _state.value
-        val raw = st.buffer
-        if (raw.isBlank() || raw == "-" || raw == ".") return
-        val value = raw.toDoubleOrNull() ?: return
-        val newSi = when (st.selected) {
-            Field.DIRECTION -> st.si.copy(windDirection = ClockDirection(value.toInt().coerceIn(1, 12)))
-            Field.HUMIDITY -> st.si.copy(humidityPct = value)
-            Field.INCLINATION -> st.si.copy(inclinationDeg = value)
-            Field.RANGE -> st.si.copy(rangeM = UnitConverter.toSi(value, Quantity.DISTANCE, st.unit))
-            Field.WIND -> st.si.copy(windSpeedMs = UnitConverter.toSi(value, Quantity.VELOCITY, st.unit))
-            Field.TEMPERATURE -> st.si.copy(temperatureC = UnitConverter.toSi(value, Quantity.TEMPERATURE, st.unit))
-            Field.ALTITUDE -> st.si.copy(altitudeM = UnitConverter.toSi(value, Quantity.ALTITUDE, st.unit))
-        }
-        _state.value = st.copy(si = newSi, buffer = "")
-        persist(newSi)
+        val committed = InputEditor.commit(st.buffer, st.selected, st.unit, st.si)
+        if (committed == st.si) return
+        _state.value = st.copy(si = committed, buffer = "")
+        persist(committed)
     }
 
     private fun persist(input: OperatorInput) {
         viewModelScope.launch { runCatching { settings.setLastInput(input) } }
-    }
-
-    private fun nextField(f: Field): Field {
-        val v = Field.entries
-        return v[(v.indexOf(f) + 1) % v.size]
-    }
-
-    private fun prevField(f: Field): Field {
-        val v = Field.entries
-        return v[(v.indexOf(f) - 1 + v.size) % v.size]
     }
 
     /** RESET restores the default operator inputs. Protected profile data is never touched. */
