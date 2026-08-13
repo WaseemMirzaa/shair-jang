@@ -50,6 +50,13 @@ echo "sdk.dir=$HOME/Android/Sdk" > local.properties
 In Android Studio: **File → Open**, select the repository root, let Gradle sync, pick a device on
 API 26+ and press **Run**.
 
+### Getting an APK without a local SDK
+
+Every push runs `.github/workflows/android.yml` on GitHub's runners, which build the debug and
+release APKs and attach them to the run as the **`smart-field-calculator-apk`** artifact — open the
+run under the repository's *Actions* tab and download it from the Artifacts section. The same
+workflow runs the unit tests and the Compose UI tests on an emulator.
+
 ### Exporting an APK
 
 ```bash
