@@ -12,6 +12,7 @@ import com.codetivelab.fieldcalc.ui.calculator.Field
 import com.codetivelab.fieldcalc.ui.components.KeypadTags
 import com.codetivelab.fieldcalc.ui.results.ResultsTags
 import com.codetivelab.fieldcalc.ui.results.TAG_TRAJECTORY_GRAPH
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -154,11 +155,19 @@ class CalculatorFlowTest {
     @Test fun invalidInput_showsAnOperatorMessageAndDoesNotNavigate() {
         enter(Field.RANGE, 5, 0, 0)             // a valid range, so humidity is what fails
         enter(Field.HUMIDITY, 9, 9, 9)          // 999 % is out of range
-        rule.tap(KeypadTags.SOLVE)
 
+        // Check the entry landed before blaming the solve for the status text.
+        assertEquals("humidity field after typing 999", "999_",
+            rule.textOf(CalculatorTags.value(Field.HUMIDITY)))
+
+        rule.tap(KeypadTags.SOLVE)
+        rule.waitForIdle()
         rule.waitUntil(timeoutMillis = 10_000) {
-            rule.textOf(CalculatorTags.STATUS) == "INVALID HUMIDITY"
+            rule.textOf(CalculatorTags.STATUS) != "READY"
         }
+        // assertEquals names the status actually shown, where waitUntil would only time out.
+        assertEquals("status after an out-of-range humidity", "INVALID HUMIDITY",
+            rule.textOf(CalculatorTags.STATUS))
         assertTrue("an invalid solve must not produce a solution",
             rule.textOf(CalculatorTags.OUT_HEIGHT).none { it in '0'..'9' })
     }
