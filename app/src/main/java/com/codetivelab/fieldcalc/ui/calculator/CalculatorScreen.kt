@@ -228,7 +228,7 @@ private fun InputColumn(state: CalcUiState, vm: CalculatorViewModel, modifier: M
         LcdStatusBar(
             text = stringResource(state.error ?: state.status),
             tint = if (state.error != null) WarnRed else LcdPositive,
-            modifier = Modifier.testTag(CalculatorTags.STATUS)
+            textTag = CalculatorTags.STATUS
         )
     }
 }

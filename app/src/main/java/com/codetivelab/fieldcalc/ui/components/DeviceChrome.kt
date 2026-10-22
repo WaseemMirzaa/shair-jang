@@ -262,7 +262,12 @@ fun LcdDivider(vertical: Boolean = false, modifier: Modifier = Modifier) {
 
 /** Inverted strip at the foot of a column — the display's own status line. */
 @Composable
-fun LcdStatusBar(text: String, tint: Color = LcdPositive, modifier: Modifier = Modifier) {
+fun LcdStatusBar(
+    text: String,
+    tint: Color = LcdPositive,
+    modifier: Modifier = Modifier,
+    textTag: String? = null
+) {
     Box(
         modifier
             .fillMaxWidth()
@@ -277,7 +282,8 @@ fun LcdStatusBar(text: String, tint: Color = LcdPositive, modifier: Modifier = M
             fontFamily = FontFamily.Monospace,
             fontSize = 10.sp,
             letterSpacing = 0.5.sp,
-            maxLines = 1
+            maxLines = 1,
+            modifier = if (textTag != null) Modifier.testTag(textTag) else Modifier
         )
     }
 }

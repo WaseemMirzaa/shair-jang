@@ -83,7 +83,8 @@ jobs:
           - \`smart-field-calculator-${v}-debug.apk\` — installs directly on any Android 8.0+ (API 26) device.
           - \`smart-field-calculator-${v}-release-unsigned.apk\` — minified and resource-shrunk; sign it with your own keystore before distributing.
 
-          Built from \`${GITHUB_SHA}\`. Unit tests and Compose UI tests pass on this commit." \
+          Built from \`${GITHUB_SHA}\`. The unit test suite passes on this commit; see the
+          repository's Actions runs for the Compose UI test result." \
             "smart-field-calculator-${v}-debug.apk" \
             "smart-field-calculator-${v}-release-unsigned.apk"
 
