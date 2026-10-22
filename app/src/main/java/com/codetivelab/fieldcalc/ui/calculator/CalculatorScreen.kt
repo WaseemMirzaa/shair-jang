@@ -5,13 +5,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -118,13 +117,14 @@ fun CalculatorScreen(
     val result by vm.result.collectAsStateWithLifecycle()
     var menuOpen by remember { mutableStateOf(false) }
 
-    Box(
+    Column(
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
             .padding(10.dp)
     ) {
-        DeviceBody(Modifier.fillMaxSize()) {
+        DeviceBody(Modifier.fillMaxWidth()) {
 
             DeviceTitle(
                 title = stringResource(R.string.title_main),
@@ -133,13 +133,8 @@ fun CalculatorScreen(
             Spacer(Modifier.height(8.dp))
 
             // ---- The glass -------------------------------------------------------------
-            LcdScreen(
-                Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .heightIn(min = 250.dp)
-            ) {
-                Row(Modifier.fillMaxSize()) {
+            LcdScreen(Modifier.fillMaxWidth()) {
+                Row(Modifier.fillMaxWidth().height(IntrinsicSize.Max)) {
                     InputColumn(state, vm, Modifier.weight(1.15f))
                     LcdDivider(vertical = true, modifier = Modifier.padding(horizontal = 7.dp))
                     OutputColumn(
@@ -202,26 +197,24 @@ fun CalculatorScreen(
 
 @Composable
 private fun InputColumn(state: CalcUiState, vm: CalculatorViewModel, modifier: Modifier) {
-    Column(modifier.fillMaxHeight()) {
+    Column(modifier) {
         LcdHeader(stringResource(R.string.section_input_data))
         Spacer(Modifier.height(4.dp))
 
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            Field.entries.forEach { field ->
-                val selected = state.selected == field
-                val shown = vm.displayValue(field)
-                LcdDataRow(
-                    icon = iconFor(field),
-                    label = stringResource(labelFor(field)),
-                    value = if (selected) "${shown}_" else shown,
-                    unit = unitLabel(field, vm),
-                    selected = selected,
-                    valueTag = CalculatorTags.value(field),
-                    modifier = Modifier
-                        .testTag(CalculatorTags.field(field))
-                        .clickable { vm.select(field) }
-                )
-            }
+        Field.entries.forEach { field ->
+            val selected = state.selected == field
+            val shown = vm.displayValue(field)
+            LcdDataRow(
+                icon = iconFor(field),
+                label = stringResource(labelFor(field)),
+                value = if (selected) "${shown}_" else shown,
+                unit = unitLabel(field, vm),
+                selected = selected,
+                valueTag = CalculatorTags.value(field),
+                modifier = Modifier
+                    .testTag(CalculatorTags.field(field))
+                    .clickable { vm.select(field) }
+            )
         }
 
         Spacer(Modifier.height(4.dp))
@@ -256,51 +249,49 @@ private fun OutputColumn(result: SolveResult?, unit: UnitSystem, modifier: Modif
         return UnitConverter.format(display, decimals)
     }
 
-    Column(modifier.fillMaxHeight()) {
+    Column(modifier) {
         LcdHeader(stringResource(R.string.section_output))
         Spacer(Modifier.height(6.dp))
 
-        Column(Modifier.weight(1f).verticalScroll(rememberScrollState())) {
-            LcdBigReadout(
-                label = stringResource(R.string.results_height),
-                value = show(point?.heightM, Quantity.ALTITUDE, 2),
-                unit = UnitConverter.label(Quantity.ALTITUDE, unit),
-                valueTag = CalculatorTags.OUT_HEIGHT
-            )
-            Spacer(Modifier.height(6.dp))
-            LcdBigReadout(
-                label = stringResource(R.string.table_col_drift),
-                value = show(point?.driftM, Quantity.ALTITUDE, 2),
-                unit = UnitConverter.label(Quantity.ALTITUDE, unit),
-                valueTag = CalculatorTags.OUT_DRIFT
-            )
+        LcdBigReadout(
+            label = stringResource(R.string.results_height),
+            value = show(point?.heightM, Quantity.ALTITUDE, 2),
+            unit = UnitConverter.label(Quantity.ALTITUDE, unit),
+            valueTag = CalculatorTags.OUT_HEIGHT
+        )
+        Spacer(Modifier.height(6.dp))
+        LcdBigReadout(
+            label = stringResource(R.string.table_col_drift),
+            value = show(point?.driftM, Quantity.ALTITUDE, 2),
+            unit = UnitConverter.label(Quantity.ALTITUDE, unit),
+            valueTag = CalculatorTags.OUT_DRIFT
+        )
 
-            Spacer(Modifier.height(8.dp))
-            LcdDivider()
-            Spacer(Modifier.height(6.dp))
+        Spacer(Modifier.height(8.dp))
+        LcdDivider()
+        Spacer(Modifier.height(6.dp))
 
-            Text(
-                text = stringResource(R.string.section_flight_data),
-                color = LcdInk,
-                fontFamily = FontFamily.Monospace,
-                fontSize = 10.sp
-            )
-            Spacer(Modifier.height(2.dp))
-            LcdStatRow(
-                stringResource(R.string.results_velocity),
-                show(point?.velocityMs, Quantity.VELOCITY, 1)
-            )
-            LcdStatRow(stringResource(R.string.results_mach), show(point?.mach, null, 2))
-            LcdStatRow(
-                stringResource(R.string.results_energy),
-                show(point?.energyJ, Quantity.ENERGY, 0)
-            )
-            LcdStatRow(stringResource(R.string.results_time), show(point?.timeS, null, 3))
-            LcdStatRow(
-                stringResource(R.string.results_density),
-                show(result?.atmosphere?.densityKgM3, null, 3)
-            )
-        }
+        Text(
+            text = stringResource(R.string.section_flight_data),
+            color = LcdInk,
+            fontFamily = FontFamily.Monospace,
+            fontSize = 10.sp
+        )
+        Spacer(Modifier.height(2.dp))
+        LcdStatRow(
+            stringResource(R.string.results_velocity),
+            show(point?.velocityMs, Quantity.VELOCITY, 1)
+        )
+        LcdStatRow(stringResource(R.string.results_mach), show(point?.mach, null, 2))
+        LcdStatRow(
+            stringResource(R.string.results_energy),
+            show(point?.energyJ, Quantity.ENERGY, 0)
+        )
+        LcdStatRow(stringResource(R.string.results_time), show(point?.timeS, null, 3))
+        LcdStatRow(
+            stringResource(R.string.results_density),
+            show(result?.atmosphere?.densityKgM3, null, 3)
+        )
 
         Spacer(Modifier.height(4.dp))
         LcdStatusBar(
