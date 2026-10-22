@@ -19,11 +19,8 @@ import com.codetivelab.fieldcalc.domain.validation.InputValidator
 import com.codetivelab.fieldcalc.ui.components.Key
 import com.codetivelab.fieldcalc.ui.i18n.messageResFor
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
@@ -71,10 +68,6 @@ class CalculatorViewModel(app: Application) : AndroidViewModel(app) {
 
     private val _result = MutableStateFlow<SolveResult?>(null)
     val result: StateFlow<SolveResult?> = _result.asStateFlow()
-
-    /** One-shot "a solve finished, show the results screen" signal (never replayed on back). */
-    private val _solved = MutableSharedFlow<Unit>(extraBufferCapacity = 1)
-    val solved: SharedFlow<Unit> = _solved.asSharedFlow()
 
     /** Profile whose environment defaults have already been applied. */
     private var seededFromProfile: Long? = null
@@ -205,7 +198,6 @@ class CalculatorViewModel(app: Application) : AndroidViewModel(app) {
                 .onSuccess { res ->
                     _result.value = res
                     _state.value = _state.value.copy(calculating = false, status = R.string.status_complete)
-                    _solved.tryEmit(Unit)
                 }
                 .onFailure { t ->
                     // Operators see a plain message; the detail goes to logcat for developers.

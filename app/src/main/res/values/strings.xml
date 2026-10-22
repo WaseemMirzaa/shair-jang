@@ -172,4 +172,19 @@
     <string name="settings_offline">OFFLINE • NO NETWORK ACCESS</string>
     <string name="settings_about">ABOUT</string>
     <string name="about_body">Smart Field Calculator %1$s — an offline educational trajectory simulator. Outputs are physics quantities only.</string>
+
+    <!-- Instrument face -->
+    <string name="subtitle_device">EDUCATIONAL TRAJECTORY SIMULATOR</string>
+    <string name="section_output">SIMULATION OUTPUT</string>
+    <string name="section_flight_data">FLIGHT DATA</string>
+    <string name="hint_press_solve">PRESS SOLVE TO RUN SIMULATION</string>
+    <string name="hint_tap_detail">TAP FOR TABLE / GRAPH</string>
+    <string name="placeholder_value">\u2013\u2013</string>
+    <string name="profile_calibre">CALIBRE</string>
+    <string name="profile_mass">MASS</string>
+    <string name="profile_drag">DRAG MODEL</string>
+    <string name="profile_launch">LAUNCH VEL</string>
+    <string name="profile_units">UNITS</string>
+    <string name="menu_results">TRAJECTORY TABLE / GRAPH</string>
+    <string name="tagline">BUILT FOR LEARNING. WORKS COMPLETELY OFFLINE.</string>
 </resources>

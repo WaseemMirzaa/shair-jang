@@ -100,10 +100,25 @@ class CalculatorFlowTest {
         assertTrue(rule.textOf(CalculatorTags.value(Field.RANGE)).endsWith("_"))
     }
 
-    @Test fun solve_showsTheResultThenTableThenGraphThenReturns() {
+    @Test fun solve_fillsTheOutputPanelInPlace() {
         enter(Field.RANGE, 6, 5, 0)
+        // Before solving, the output column shows its blank placeholders.
+        assertTrue(rule.textOf(CalculatorTags.OUT_HEIGHT).all { it !in '0'..'9' })
 
         rule.tap(KeypadTags.SOLVE)
+        awaitSolution()
+
+        // Height and drift are now real numbers, on the same screen as the inputs.
+        assertTrue(rule.textOf(CalculatorTags.OUT_HEIGHT).any { it in '0'..'9' })
+        assertTrue(rule.textOf(CalculatorTags.OUT_DRIFT).any { it in '0'..'9' })
+    }
+
+    @Test fun outputPanel_opensTheTableAndGraph() {
+        enter(Field.RANGE, 6, 5, 0)
+        rule.tap(KeypadTags.SOLVE)
+        awaitSolution()
+
+        rule.tap(CalculatorTags.OUTPUT)
         rule.waitUntil(timeoutMillis = 20_000) { rule.hasTag(ResultsTags.TITLE) }
         rule.onNodeWithTag(ResultsTags.SUMMARY).assertIsDisplayed()
 
@@ -120,6 +135,8 @@ class CalculatorFlowTest {
     @Test fun back_fromResults_staysOnTheCalculator() {
         enter(Field.RANGE, 5, 0, 0)
         rule.tap(KeypadTags.SOLVE)
+        awaitSolution()
+        rule.tap(CalculatorTags.OUTPUT)
         rule.waitUntil(timeoutMillis = 20_000) { rule.hasTag(ResultsTags.TITLE) }
 
         rule.tap(ResultsTags.BTN_BACK)
@@ -127,6 +144,11 @@ class CalculatorFlowTest {
         rule.waitForIdle()
         // A stale result must not bounce the operator forward again.
         assertTrue("the results screen came back on its own", !rule.hasTag(ResultsTags.TITLE))
+    }
+
+    /** A solve is done once the headline readout carries digits instead of placeholders. */
+    private fun awaitSolution() = rule.waitUntil(timeoutMillis = 20_000) {
+        rule.textOf(CalculatorTags.OUT_HEIGHT).any { it in '0'..'9' }
     }
 
     @Test fun invalidInput_showsAnOperatorMessageAndDoesNotNavigate() {
@@ -137,7 +159,8 @@ class CalculatorFlowTest {
         rule.waitUntil(timeoutMillis = 10_000) {
             rule.textOf(CalculatorTags.STATUS) == "INVALID HUMIDITY"
         }
-        assertTrue("an invalid solve must not navigate", !rule.hasTag(ResultsTags.TITLE))
+        assertTrue("an invalid solve must not produce a solution",
+            rule.textOf(CalculatorTags.OUT_HEIGHT).none { it in '0'..'9' })
     }
 
     @Test fun missingRange_isReportedAsInputRequired() {
